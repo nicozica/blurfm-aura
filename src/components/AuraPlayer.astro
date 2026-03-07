@@ -1,0 +1,117 @@
+---
+import QualitySelector from "./QualitySelector.astro";
+import RecentlyPlayedPanel from "./RecentlyPlayedPanel.astro";
+---
+
+<main class="aura-app" id="aura-app" style="--artwork-url: url('/brand/cover-default.webp');">
+  <div class="aura-stage">
+    <header class="aura-header">
+      <a href="/" class="aura-brand" aria-label="Blur FM Aura">
+        <img src="/brand/logo.svg" alt="Blur FM" />
+        <span class="aura-brand-mark">Aura</span>
+      </a>
+
+      <div class="aura-header-actions">
+        <button
+          type="button"
+          class="header-action"
+          id="recently-toggle"
+          aria-expanded="false"
+          aria-controls="recently-panel"
+        >
+          Recently played
+        </button>
+        <button
+          type="button"
+          class="header-action fullscreen-toggle"
+          id="fullscreen-toggle"
+          aria-pressed="false"
+        >
+          Full screen
+        </button>
+      </div>
+    </header>
+
+    <div class="aura-main-centered">
+      <section class="player-layout">
+        <figure class="cover-stage">
+          <img
+            id="cover-image"
+            class="cover-image"
+            src="/brand/cover-default.webp"
+            alt="Current song cover"
+            loading="eager"
+          />
+        </figure>
+
+        <section class="player-main" aria-label="Blur FM live player">
+          <p class="live-pill">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span>Live on Air</span>
+          </p>
+          <h1 class="song-title" id="song-title">Loading song title...</h1>
+          <p class="song-artist" id="song-artist">Please wait</p>
+
+          <p class="song-extra" id="song-extra" hidden>
+            <span id="song-album" hidden></span>
+            <span id="song-extra-separator" hidden>•</span>
+            <span id="song-year" hidden></span>
+          </p>
+
+          <div class="control-stack">
+            <div class="primary-controls">
+              <button
+                type="button"
+                class="play-toggle"
+                id="play-toggle"
+                aria-pressed="false"
+                aria-label="Play"
+              >
+                <span class="play-toggle-glyph" id="play-toggle-glyph" aria-hidden="true">▶</span>
+              </button>
+
+              <QualitySelector />
+
+              <div class="volume-control">
+                <button
+                  type="button"
+                  class="volume-icon-btn"
+                  id="volume-icon-btn"
+                  aria-label="Mute"
+                  data-volume-state="high"
+                >
+                  <svg class="volume-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="volume-speaker" d="M4 10h3.8L12 6.5v11L7.8 14H4z" />
+                    <path class="volume-wave volume-wave-low" d="M14.8 9.2c1 .7 1.6 1.7 1.6 2.8s-.6 2.1-1.6 2.8" />
+                    <path class="volume-wave volume-wave-mid" d="M17.2 7.3c1.5 1.1 2.4 2.8 2.4 4.7s-.9 3.6-2.4 4.7" />
+                    <path class="volume-wave volume-wave-high" d="M19.6 5.4c2.1 1.6 3.4 4 3.4 6.6s-1.3 5-3.4 6.6" />
+                    <path class="volume-mute-line" d="M21.2 8.3 14.5 15" />
+                  </svg>
+                </button>
+                <input
+                  id="volume-slider"
+                  class="volume-slider"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value="1"
+                  aria-label="Volume"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <RecentlyPlayedPanel />
+  <audio id="audio-player" preload="none"></audio>
+</main>
+
+<script>
+  import { initAuraPlayer } from "../scripts/player";
+
+  initAuraPlayer();
+</script>

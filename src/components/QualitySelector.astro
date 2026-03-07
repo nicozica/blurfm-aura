@@ -1,0 +1,71 @@
+<section class="quality-selector" id="quality-selector">
+  <button
+    type="button"
+    class="quality-trigger"
+    id="quality-trigger"
+    aria-expanded="false"
+    aria-controls="quality-panel"
+    aria-label="Audio quality"
+  >
+    <span class="quality-badge" id="quality-current-badge" data-quality="standard">HIGH</span>
+  </button>
+
+  <div class="quality-panel" id="quality-panel" hidden>
+    <p class="quality-panel-title">Audio quality</p>
+
+    <div class="quality-options" role="radiogroup" aria-label="Audio quality options">
+      <button
+        type="button"
+        class="quality-option-main"
+        data-quality-option="high"
+        role="radio"
+        aria-checked="false"
+        tabindex="-1"
+      >
+        <span class="quality-radio-indicator" aria-hidden="true"></span>
+        <span class="quality-option-copy">
+          <span class="quality-option-name">Max</span>
+          <span class="quality-option-desc">320 kbps · MP3</span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="quality-option-main"
+        data-quality-option="standard"
+        role="radio"
+        aria-checked="true"
+        tabindex="0"
+      >
+        <span class="quality-radio-indicator" aria-hidden="true"></span>
+        <span class="quality-option-copy">
+          <span class="quality-option-name">High</span>
+          <span class="quality-option-desc">128 kbps · MP3</span>
+        </span>
+      </button>
+
+      <div class="quality-option-low">
+        <button
+          type="button"
+          class="quality-option-main"
+          data-quality-option="low"
+          role="radio"
+          aria-checked="false"
+          tabindex="-1"
+          id="quality-low-button"
+        >
+          <span class="quality-radio-indicator" aria-hidden="true"></span>
+          <span class="quality-option-copy">
+            <span class="quality-option-name">Low</span>
+            <span class="quality-option-desc">Data saver</span>
+          </span>
+        </button>
+
+        <select class="quality-low-select" id="quality-low-select" aria-label="Low quality bitrate">
+          <option value="datasaver">64 kbps · MP3</option>
+          <option value="ultra">32 kbps · AAC+</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
