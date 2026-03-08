@@ -150,6 +150,44 @@ select {
   cursor: pointer;
 }
 
+.history-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+}
+
+.history-icon {
+  width: 15px;
+  height: 15px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fullscreen-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+}
+
+.fullscreen-icon {
+  width: 15px;
+  height: 15px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mobile-history-inline {
+  display: none;
+}
+
 @media (hover: hover) {
   .header-action:hover {
     border-color: rgba(203, 213, 225, 0.56);
@@ -912,9 +950,101 @@ select {
     padding-bottom: 0;
   }
 
+  .history-desktop,
   .fullscreen-toggle,
   .volume-control {
     display: none;
+  }
+
+  .mobile-history-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.36rem;
+    justify-self: start;
+    height: 32px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 8px;
+    background: rgba(10, 18, 34, 0.4);
+    color: var(--aura-text-soft);
+    padding: 0.36rem 0.56rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mobile-history-inline .history-icon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .aura-main-centered {
+    width: 100%;
+  }
+
+  .player-layout {
+    gap: 1.35rem;
+  }
+
+  .player-main {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .song-extra {
+    justify-content: flex-start;
+  }
+
+  .control-stack {
+    width: 100%;
+    margin-top: 0.86rem;
+    padding-top: 0.92rem;
+    position: relative;
+  }
+
+  .control-stack::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(248, 250, 252, 0.14) 0%,
+      rgba(248, 250, 252, 0.45) 45%,
+      rgba(248, 250, 252, 0.14) 100%
+    );
+  }
+
+  .primary-controls {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.82rem;
+  }
+
+  .play-toggle {
+    order: 2;
+    justify-self: center;
+  }
+
+  .quality-selector {
+    order: 3;
+    justify-self: end;
+  }
+
+  .quality-trigger,
+  .quality-selector {
+    height: 32px;
+  }
+
+  .quality-badge {
+    font-size: 0.68rem;
+    border-radius: 8px;
+    padding: 0.36rem 0.56rem;
   }
 
   .quality-panel {

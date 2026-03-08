@@ -156,7 +156,11 @@ export function initAuraPlayer(): void {
   const volumeIcon = document.getElementById("volume-icon") as HTMLImageElement | null;
   const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement | null;
   const fullscreenToggle = document.getElementById("fullscreen-toggle") as HTMLButtonElement | null;
+  const fullscreenToggleLabel = document.getElementById("fullscreen-toggle-label");
   const recentlyToggle = document.getElementById("recently-toggle") as HTMLButtonElement | null;
+  const recentlyToggleMobile = document.getElementById(
+    "recently-toggle-mobile"
+  ) as HTMLButtonElement | null;
   const recentlyModal = document.getElementById("recently-modal");
   const recentlyOverlay = document.getElementById("recently-overlay") as HTMLButtonElement | null;
   const recentlyPanel = document.getElementById("recently-panel");
@@ -183,6 +187,7 @@ export function initAuraPlayer(): void {
     !volumeIcon ||
     !volumeSlider ||
     !fullscreenToggle ||
+    !fullscreenToggleLabel ||
     !recentlyToggle ||
     !recentlyModal ||
     !recentlyOverlay ||
@@ -458,6 +463,9 @@ export function initAuraPlayer(): void {
     isRecentlyPanelOpen = open;
     recentlyModal.hidden = !open;
     recentlyToggle.setAttribute("aria-expanded", String(open));
+    if (recentlyToggleMobile) {
+      recentlyToggleMobile.setAttribute("aria-expanded", String(open));
+    }
     document.body.classList.toggle("is-recently-open", open);
   }
 
@@ -528,7 +536,7 @@ export function initAuraPlayer(): void {
 
   function syncFullscreenUi(): void {
     const fullscreenOn = Boolean(document.fullscreenElement);
-    fullscreenToggle.textContent = fullscreenOn ? "Exit full screen" : "Full screen";
+    fullscreenToggleLabel.textContent = fullscreenOn ? "Exit full screen" : "Full screen";
     fullscreenToggle.setAttribute("aria-pressed", String(fullscreenOn));
   }
 
@@ -681,6 +689,12 @@ export function initAuraPlayer(): void {
   recentlyToggle.addEventListener("click", () => {
     setRecentlyPanel(!isRecentlyPanelOpen);
   });
+
+  if (recentlyToggleMobile) {
+    recentlyToggleMobile.addEventListener("click", () => {
+      setRecentlyPanel(!isRecentlyPanelOpen);
+    });
+  }
 
   recentlyOverlay.addEventListener("click", () => {
     setRecentlyPanel(false);
