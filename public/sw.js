@@ -1,4 +1,4 @@
-const CACHE_NAME = "aura-shell-v2";
+const CACHE_NAME = "aura-shell-v3";
 const SHELL_ASSETS = [
   "/",
   "/manifest.webmanifest",
