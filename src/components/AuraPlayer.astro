@@ -6,9 +6,8 @@ import RecentlyPlayedPanel from "./RecentlyPlayedPanel.astro";
 <main class="aura-app" id="aura-app" style="--artwork-url: url('/brand/cover-default.webp');">
   <div class="aura-stage">
     <header class="aura-header">
-      <a href="/" class="aura-brand" aria-label="Blur FM Aura">
+      <a href="/" class="aura-brand" aria-label="Blur FM Player">
         <img src="/brand/logo.svg" alt="Blur FM" />
-        <span class="aura-brand-mark">Aura</span>
       </a>
 
       <div class="aura-header-actions">
@@ -67,7 +66,15 @@ import RecentlyPlayedPanel from "./RecentlyPlayedPanel.astro";
                 aria-pressed="false"
                 aria-label="Play"
               >
-                <span class="play-toggle-glyph" id="play-toggle-glyph" aria-hidden="true">▶</span>
+                <img
+                  id="play-toggle-icon"
+                  class="play-toggle-icon"
+                  src="/brand/player-controls/btn-play.svg"
+                  data-play-icon="/brand/player-controls/btn-play.svg"
+                  data-stop-icon="/brand/player-controls/btn-stop.svg"
+                  alt=""
+                  aria-hidden="true"
+                />
               </button>
 
               <QualitySelector />
@@ -78,15 +85,18 @@ import RecentlyPlayedPanel from "./RecentlyPlayedPanel.astro";
                   class="volume-icon-btn"
                   id="volume-icon-btn"
                   aria-label="Mute"
-                  data-volume-state="high"
                 >
-                  <svg class="volume-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path class="volume-speaker" d="M4 10h3.8L12 6.5v11L7.8 14H4z" />
-                    <path class="volume-wave volume-wave-low" d="M14.8 9.2c1 .7 1.6 1.7 1.6 2.8s-.6 2.1-1.6 2.8" />
-                    <path class="volume-wave volume-wave-mid" d="M17.2 7.3c1.5 1.1 2.4 2.8 2.4 4.7s-.9 3.6-2.4 4.7" />
-                    <path class="volume-wave volume-wave-high" d="M19.6 5.4c2.1 1.6 3.4 4 3.4 6.6s-1.3 5-3.4 6.6" />
-                    <path class="volume-mute-line" d="M21.2 8.3 14.5 15" />
-                  </svg>
+                  <img
+                    id="volume-icon"
+                    class="volume-icon"
+                    src="/brand/volume-high.svg"
+                    data-muted="/brand/volume-muted.svg"
+                    data-low="/brand/volume-low.svg"
+                    data-mid="/brand/volume-mid.svg"
+                    data-high="/brand/volume-high.svg"
+                    alt=""
+                    aria-hidden="true"
+                  />
                 </button>
                 <input
                   id="volume-slider"

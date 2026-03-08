@@ -7,8 +7,8 @@ interface Props {
 }
 
 const {
-  title = "Aura | Blur FM",
-  description = "Standalone immersive Blur FM listening app."
+  title = "Player • Blur FM Online Radio",
+  description = "Blur FM standalone online radio player."
 } = Astro.props;
 ---
 
@@ -19,10 +19,12 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <meta name="application-name" content="Blur FM Player" />
     <meta name="theme-color" content="#0f172a" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Aura" />
+    <meta name="apple-mobile-web-app-title" content="Blur FM Player" />
     <link rel="apple-touch-icon" href="/icon-192x192.png" />
     <link rel="icon" href="/icon-192x192.png" type="image/png" />
     <link rel="manifest" href="/manifest.webmanifest" />

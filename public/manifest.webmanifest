@@ -1,13 +1,16 @@
 {
-  "name": "Aura by Blur FM",
-  "short_name": "Aura",
-  "description": "Standalone immersive listening app for Blur FM.",
+  "id": "/",
+  "name": "Blur FM Player",
+  "short_name": "Blur FM",
+  "description": "Blur FM standalone online radio player.",
   "start_url": "/",
   "scope": "/",
+  "display_override": ["standalone", "browser"],
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#050912",
   "theme_color": "#0f172a",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192x192.png",

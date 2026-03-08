@@ -17,6 +17,8 @@ interface RecentlyPlayedItem extends SongMetadata {
   playedAt: number;
 }
 
+const PLAY_START_TIMEOUT_MS = 7000;
+
 function isQualityKey(value: string | null | undefined): value is QualityKey {
   return value === "high" || value === "standard" || value === "datasaver" || value === "ultra";
 }
@@ -25,8 +27,35 @@ function getTrackIdentity(track: SongMetadata): string {
   return `${track.artist}::${track.title}`.toLowerCase().trim();
 }
 
+function normalizeTextToken(value: string | null | undefined): string {
+  return (value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim();
+}
+
 function isDefaultTrack(track: SongMetadata): boolean {
   return getTrackIdentity(track) === getTrackIdentity(DEFAULT_TRACK);
+}
+
+function isStationIdTrack(track: SongMetadata): boolean {
+  const title = normalizeTextToken(track.title);
+  const artist = normalizeTextToken(track.artist);
+
+  if (!title) {
+    return false;
+  }
+
+  if (title.includes("station id")) {
+    return true;
+  }
+
+  const looksLikeIdCode = /\bid[\s_-]*\d{1,3}\b/.test(title);
+  const looksLikeJingle = /\bjingle\b|\bident\b/.test(title);
+  const isBlurBrandTrack = artist === "blur fm";
+
+  return isBlurBrandTrack && (looksLikeIdCode || looksLikeJingle);
 }
 
 function isSameTrack(a: SongMetadata, b: SongMetadata): boolean {
@@ -46,6 +75,60 @@ function getStoredQuality(): QualityKey {
 
 function escapeArtworkUrl(url: string): string {
   return url.replace(/"/g, "%22");
+}
+
+function toAbsoluteUrl(url: string): string {
+  try {
+    return new URL(url, window.location.origin).toString();
+  } catch {
+    return url;
+  }
+}
+
+function buildMediaSessionArtwork(coverUrl: string): Array<{ src: string; sizes: string; type: string }> {
+  const artwork: Array<{ src: string; sizes: string; type: string }> = [];
+
+  if (coverUrl && coverUrl.includes("mzstatic.com")) {
+    [96, 128, 192, 256, 384, 512].forEach((size) => {
+      artwork.push({
+        src: coverUrl.replace(/\d+x\d+/, `${size}x${size}`),
+        sizes: `${size}x${size}`,
+        type: "image/jpeg"
+      });
+    });
+    return artwork;
+  }
+
+  if (coverUrl) {
+    artwork.push(
+      {
+        src: toAbsoluteUrl(coverUrl),
+        sizes: "600x600",
+        type: "image/webp"
+      },
+      {
+        src: toAbsoluteUrl("/icon-512x512.png"),
+        sizes: "512x512",
+        type: "image/png"
+      }
+    );
+    return artwork;
+  }
+
+  artwork.push(
+    {
+      src: toAbsoluteUrl("/icon-512x512.png"),
+      sizes: "512x512",
+      type: "image/png"
+    },
+    {
+      src: toAbsoluteUrl("/icon-192x192.png"),
+      sizes: "192x192",
+      type: "image/png"
+    }
+  );
+
+  return artwork;
 }
 
 export function initAuraPlayer(): void {
@@ -68,8 +151,9 @@ export function initAuraPlayer(): void {
   const songYear = document.getElementById("song-year");
   const songSeparator = document.getElementById("song-extra-separator");
   const playToggle = document.getElementById("play-toggle") as HTMLButtonElement | null;
-  const playToggleGlyph = document.getElementById("play-toggle-glyph");
+  const playToggleIcon = document.getElementById("play-toggle-icon") as HTMLImageElement | null;
   const volumeIconButton = document.getElementById("volume-icon-btn") as HTMLButtonElement | null;
+  const volumeIcon = document.getElementById("volume-icon") as HTMLImageElement | null;
   const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement | null;
   const fullscreenToggle = document.getElementById("fullscreen-toggle") as HTMLButtonElement | null;
   const recentlyToggle = document.getElementById("recently-toggle") as HTMLButtonElement | null;
@@ -94,8 +178,9 @@ export function initAuraPlayer(): void {
     !songYear ||
     !songSeparator ||
     !playToggle ||
-    !playToggleGlyph ||
+    !playToggleIcon ||
     !volumeIconButton ||
+    !volumeIcon ||
     !volumeSlider ||
     !fullscreenToggle ||
     !recentlyToggle ||
@@ -125,7 +210,14 @@ export function initAuraPlayer(): void {
   let isStreamBusy = false;
   let isQualityPanelOpen = false;
   let isRecentlyPanelOpen = false;
+  let mediaSessionHandlersInit = false;
   let previousVolume = 1;
+  const playIconSrc = playToggleIcon.dataset.playIcon || "/brand/player-controls/btn-play.svg";
+  const stopIconSrc = playToggleIcon.dataset.stopIcon || "/brand/player-controls/btn-stop.svg";
+  const volumeIconMuted = volumeIcon.dataset.muted || "/brand/volume-muted.svg";
+  const volumeIconLow = volumeIcon.dataset.low || "/brand/volume-low.svg";
+  const volumeIconMid = volumeIcon.dataset.mid || "/brand/volume-mid.svg";
+  const volumeIconHigh = volumeIcon.dataset.high || "/brand/volume-high.svg";
 
   function applyTvModeClass(): void {
     const largeScreen = window.innerWidth >= 1400 && window.innerHeight >= 800;
@@ -138,6 +230,67 @@ export function initAuraPlayer(): void {
     const safeUrl = url || DEFAULT_TRACK.coverUrl;
     coverImage.src = safeUrl;
     root.style.setProperty("--artwork-url", `url("${escapeArtworkUrl(safeUrl)}")`);
+  }
+
+  function updateMediaSessionMetadata(): void {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.title || "Blur FM",
+        artist: currentTrack.artist || "Blur FM",
+        album: "Blur FM Online Radio",
+        artwork: buildMediaSessionArtwork(currentTrack.coverUrl || DEFAULT_TRACK.coverUrl)
+      });
+    } catch {
+      return;
+    }
+  }
+
+  function syncMediaSessionState(): void {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }
+
+  function initMediaSessionHandlers(): void {
+    if (!("mediaSession" in navigator) || mediaSessionHandlersInit) {
+      return;
+    }
+
+    mediaSessionHandlersInit = true;
+
+    const safeSetHandler = (
+      action: MediaSessionAction,
+      handler: MediaSessionActionHandler | null
+    ): void => {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch {
+        return;
+      }
+    };
+
+    safeSetHandler("play", async () => {
+      if (!isPlaying) {
+        await startPlayback();
+      }
+    });
+
+    safeSetHandler("pause", () => {
+      if (isPlaying || isStreamBusy || audio.currentSrc) {
+        stopPlayback();
+      }
+    });
+
+    safeSetHandler("stop", () => {
+      if (isPlaying || isStreamBusy || audio.currentSrc) {
+        stopPlayback();
+      }
+    });
   }
 
   function renderTrack(song: SongMetadata): void {
@@ -153,6 +306,7 @@ export function initAuraPlayer(): void {
     songYear.hidden = !hasYear;
     songSeparator.hidden = !(hasAlbum && hasYear);
     songExtra.hidden = !(hasAlbum || hasYear);
+    updateMediaSessionMetadata();
   }
 
   function renderRecentlyPlayed(): void {
@@ -211,7 +365,7 @@ export function initAuraPlayer(): void {
   }
 
   function addRecentlyPlayed(track: SongMetadata): void {
-    if (isDefaultTrack(track)) {
+    if (isDefaultTrack(track) || isStationIdTrack(track)) {
       return;
     }
 
@@ -228,44 +382,45 @@ export function initAuraPlayer(): void {
     playToggle.disabled = isStreamBusy;
     playToggle.setAttribute("aria-pressed", String(isPlaying));
     playToggle.classList.toggle("is-busy", isStreamBusy);
+    playToggleIcon.classList.toggle("is-busy", isStreamBusy);
 
     if (isStreamBusy) {
-      playToggleGlyph.textContent = "◌";
+      playToggleIcon.src = isPlaying ? stopIconSrc : playIconSrc;
       playToggle.setAttribute("aria-label", "Connecting");
       return;
     }
 
     if (isPlaying) {
-      playToggleGlyph.textContent = "■";
+      playToggleIcon.src = stopIconSrc;
       playToggle.setAttribute("aria-label", "Stop");
       return;
     }
 
-    playToggleGlyph.textContent = "▶";
+    playToggleIcon.src = playIconSrc;
     playToggle.setAttribute("aria-label", "Play");
   }
 
   function syncVolumeIcon(): void {
     const volumeLevel = Number.parseFloat(volumeSlider.value);
     if (audio.muted || volumeLevel <= 0) {
-      volumeIconButton.dataset.volumeState = "muted";
+      volumeIcon.src = volumeIconMuted;
       volumeIconButton.setAttribute("aria-label", "Unmute");
       return;
     }
 
     if (volumeLevel <= 0.33) {
-      volumeIconButton.dataset.volumeState = "low";
+      volumeIcon.src = volumeIconLow;
       volumeIconButton.setAttribute("aria-label", "Mute");
       return;
     }
 
     if (volumeLevel <= 0.66) {
-      volumeIconButton.dataset.volumeState = "mid";
+      volumeIcon.src = volumeIconMid;
       volumeIconButton.setAttribute("aria-label", "Mute");
       return;
     }
 
-    volumeIconButton.dataset.volumeState = "high";
+    volumeIcon.src = volumeIconHigh;
     volumeIconButton.setAttribute("aria-label", "Mute");
   }
 
@@ -323,26 +478,38 @@ export function initAuraPlayer(): void {
       audio.src = "";
       audio.load();
       audio.src = streamUrlFor(currentQuality);
-      await audio.play();
-      isPlaying = true;
+      const playPromise = audio.play();
+      const playResult = await Promise.race([
+        playPromise.then(() => "ok" as const).catch(() => "error" as const),
+        new Promise<"timeout">((resolve) => {
+          window.setTimeout(() => resolve("timeout"), PLAY_START_TIMEOUT_MS);
+        })
+      ]);
+
+      if (playResult === "ok") {
+        isPlaying = true;
+      } else if (playResult === "error") {
+        isPlaying = false;
+      } else {
+        isPlaying = !audio.paused;
+      }
     } catch {
       isPlaying = false;
     } finally {
       isStreamBusy = false;
       syncPlayButton();
+      syncMediaSessionState();
     }
   }
 
   function stopPlayback(): void {
-    if (isStreamBusy) {
-      return;
-    }
-
     audio.pause();
     audio.src = "";
     audio.load();
     isPlaying = false;
+    isStreamBusy = false;
     syncPlayButton();
+    syncMediaSessionState();
   }
 
   async function applyQuality(newQuality: QualityKey): Promise<void> {
@@ -392,6 +559,9 @@ export function initAuraPlayer(): void {
   syncQualityUi();
   setRecentlyPanel(false);
   syncFullscreenUi();
+  updateMediaSessionMetadata();
+  syncMediaSessionState();
+  initMediaSessionHandlers();
 
   playToggle.addEventListener("click", () => {
     if (isPlaying) {
@@ -539,6 +709,29 @@ export function initAuraPlayer(): void {
     isPlaying = false;
     isStreamBusy = false;
     syncPlayButton();
+    syncMediaSessionState();
+  });
+
+  audio.addEventListener("playing", () => {
+    isPlaying = true;
+    isStreamBusy = false;
+    syncPlayButton();
+    syncMediaSessionState();
+    updateMediaSessionMetadata();
+  });
+
+  audio.addEventListener("waiting", () => {
+    if (!audio.paused && audio.currentSrc) {
+      isStreamBusy = true;
+      syncPlayButton();
+    }
+  });
+
+  audio.addEventListener("stalled", () => {
+    if (!audio.paused && audio.currentSrc) {
+      isStreamBusy = true;
+      syncPlayButton();
+    }
   });
 
   void refreshMetadata();
