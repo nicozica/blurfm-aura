@@ -936,7 +936,7 @@ select {
     height: auto;
     min-height: 100dvh;
     overflow: visible;
-    padding: 1.1rem 1rem 2rem;
+    padding: 1.1rem 1rem 7.9rem;
   }
 
   .aura-stage {
@@ -990,6 +990,7 @@ select {
   .player-main {
     align-items: flex-start;
     text-align: left;
+    padding-bottom: 0.8rem;
   }
 
   .song-extra {
@@ -997,24 +998,32 @@ select {
   }
 
   .control-stack {
-    width: 100%;
-    margin-top: 0.86rem;
-    padding-top: 0.92rem;
-    position: relative;
+    position: fixed;
+    left: 0.82rem;
+    right: 0.82rem;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 0.45rem);
+    width: auto;
+    margin-top: 0;
+    padding: 1.2rem 0.62rem 0.36rem;
+    z-index: 24;
+    border-radius: 16px;
+    background:
+      linear-gradient(180deg, rgba(3, 8, 20, 0) 0%, rgba(3, 8, 20, 0.8) 22%, rgba(3, 8, 20, 0.92) 100%);
+    backdrop-filter: blur(8px);
   }
 
   .control-stack::before {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
+    left: 0.62rem;
+    right: 0.62rem;
+    top: 0.28rem;
     height: 1px;
     background: linear-gradient(
       90deg,
-      rgba(248, 250, 252, 0.14) 0%,
-      rgba(248, 250, 252, 0.45) 45%,
-      rgba(248, 250, 252, 0.14) 100%
+      rgba(248, 250, 252, 0.05) 0%,
+      rgba(248, 250, 252, 0.34) 45%,
+      rgba(248, 250, 252, 0.05) 100%
     );
   }
 
@@ -1049,8 +1058,13 @@ select {
 
   .quality-panel {
     position: fixed;
-    inset: auto 0.85rem 0.85rem;
+    inset: auto 0.85rem calc(env(safe-area-inset-bottom, 0px) + 6.9rem);
     width: auto;
+  }
+
+  body.is-recently-open .control-stack {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .quality-option-low .quality-option-main {
