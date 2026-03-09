@@ -427,6 +427,16 @@ select {
   z-index: 30;
 }
 
+.quality-selector.quality-panel-align-right .quality-panel {
+  left: auto;
+  right: 0;
+}
+
+.quality-selector.quality-panel-open-up .quality-panel {
+  top: auto;
+  bottom: calc(100% + 0.54rem);
+}
+
 .quality-panel-title {
   margin: 0 0 0.82rem;
   font-size: 1.12rem;

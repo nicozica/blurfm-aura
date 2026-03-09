@@ -4,11 +4,15 @@ import "../styles/aura.css";
 interface Props {
   title?: string;
   description?: string;
+  canonicalUrl?: string;
+  imageUrl?: string;
 }
 
 const {
-  title = "Player • Blur FM Online Radio",
-  description = "Blur FM standalone online radio player."
+  title = "Player · Blur FM Online Radio",
+  description = "Blur FM standalone online radio player.",
+  canonicalUrl = "https://play.blurfm.com/",
+  imageUrl = "https://play.blurfm.com/og.jpg"
 } = Astro.props;
 ---
 
@@ -19,12 +23,23 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="application-name" content="Blur FM" />
     <meta name="theme-color" content="#0f172a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Blur FM" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:site_name" content="Blur FM" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
     <link rel="apple-touch-icon" href="/icon-192x192.png" />
     <link rel="icon" href="/icon-192x192.png" type="image/png" />
     <link rel="manifest" href="/manifest.webmanifest" />

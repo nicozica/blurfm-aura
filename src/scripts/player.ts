@@ -447,16 +447,47 @@ export function initAuraPlayer(): void {
     });
   }
 
+  function resetQualityPanelPlacement(): void {
+    qualitySelector.classList.remove("quality-panel-align-right", "quality-panel-open-up");
+  }
+
+  function syncQualityPanelPlacement(): void {
+    resetQualityPanelPlacement();
+
+    if (window.matchMedia("(max-width: 899px)").matches) {
+      return;
+    }
+
+    const viewportPadding = 16;
+    let panelRect = qualityPanel.getBoundingClientRect();
+
+    if (panelRect.right > window.innerWidth - viewportPadding) {
+      qualitySelector.classList.add("quality-panel-align-right");
+      panelRect = qualityPanel.getBoundingClientRect();
+    }
+
+    if (panelRect.left < viewportPadding) {
+      qualitySelector.classList.remove("quality-panel-align-right");
+      panelRect = qualityPanel.getBoundingClientRect();
+    }
+
+    if (panelRect.bottom > window.innerHeight - viewportPadding) {
+      qualitySelector.classList.add("quality-panel-open-up");
+    }
+  }
+
   function openQualityPanel(): void {
     isQualityPanelOpen = true;
     qualityTrigger.setAttribute("aria-expanded", "true");
     qualityPanel.hidden = false;
+    window.requestAnimationFrame(syncQualityPanelPlacement);
   }
 
   function closeQualityPanel(): void {
     isQualityPanelOpen = false;
     qualityTrigger.setAttribute("aria-expanded", "false");
     qualityPanel.hidden = true;
+    resetQualityPanelPlacement();
   }
 
   function setRecentlyPanel(open: boolean): void {
@@ -556,6 +587,11 @@ export function initAuraPlayer(): void {
 
   applyTvModeClass();
   window.addEventListener("resize", applyTvModeClass);
+  window.addEventListener("resize", () => {
+    if (isQualityPanelOpen) {
+      syncQualityPanelPlacement();
+    }
+  });
 
   audio.volume = Math.min(1, Math.max(0, Number.parseFloat(volumeSlider.value) || 1));
   audio.muted = false;
